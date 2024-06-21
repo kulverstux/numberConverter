@@ -13,6 +13,7 @@
                 return false;
             }
             Console.WriteLine();
+            Console.WriteLine();
             string allCaps = number.ToUpper();
             bool correctFormat = true ; 
 
