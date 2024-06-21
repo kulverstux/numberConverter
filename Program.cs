@@ -12,8 +12,7 @@
                 Console.WriteLine("hexadecimal based numbers consists of digits from 0 to 9 and/or letters from A-F (A, B, C, D, E, F), case insensitive");
                 return false;
             }
-            Console.WriteLine();
-            Console.WriteLine();
+
             string allCaps = number.ToUpper();
             bool correctFormat = true ; 
 
