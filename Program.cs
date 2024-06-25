@@ -98,7 +98,23 @@ public class Program
         return true;
     }
 
+    public static void ConvertDecimalToSelected(Dictionary<int, int> intDict, int ConvertToSystem)
+    {
+        int realLength = intDict.Count;
+        int minusOneLength = realLength - 1;
 
+        for (; minusOneLength >= 0;) //output
+        {
+            if (realLength % 4 == 0) Console.Write(" "); //dvejetainiu formatavimas
+            var singleDictValue = intDict[minusOneLength];
+            Console.Write(singleDictValue);
+            minusOneLength--;
+            realLength--;
+        }
+
+        Console.WriteLine();
+
+    }
 
     public static void Converter(string number, string system)
     {
@@ -124,36 +140,36 @@ public class Program
         //}
 
         Console.WriteLine($"To witch format you want to convert your number? Your number is {intNumber} which is in {intNumberSystem} number system");
-        var ConvertToSystem = Console.ReadLine();
-
+        var Conv = Console.ReadLine();
+        int ConvertToSystem = int.Parse(Conv);
 
         while (intNumber >= leftOverNumber) //converts to decimal
-            {
+        { 
                 leftOverNumber = intNumber % intNumberSystem;
                 intNumber = intNumber / intNumberSystem;
 
                 intDict.Add(i, leftOverNumber);
                 i++;
                 if (intNumber != 0 && intNumber < leftOverNumber) intDict.Add(i, intNumber);
-            }
+        }
 
-        
+        ConvertDecimalToSelected(intDict, ConvertToSystem);
            
         
-            int realLength = intDict.Count;
-            int minusOneLength = realLength - 1;
+            //int realLength = intDict.Count;
+            //int minusOneLength = realLength - 1;
 
-            for (; minusOneLength >= 0;) //output
-            {
-                if (intNumberSystem == 2 && realLength % 4 == 0) Console.Write(" "); //dvejetainiu formatavimas
-                var singleDictValue = intDict[minusOneLength];
-                Console.Write(singleDictValue);
-                minusOneLength--;
-                realLength--;
-            }
+        //    for (; minusOneLength >= 0;) //output
+        //    {
+        //        if (realLength % 4 == 0) Console.Write(" "); //dvejetainiu formatavimas
+        //        var singleDictValue = intDict[minusOneLength];
+        //        Console.Write(singleDictValue);
+        //        minusOneLength--;
+        //        realLength--;
+        //    }
         
-        Console.WriteLine();
-    }
+        //Console.WriteLine();
+     }
     public static void BinaryToDecimal()
     {
 
