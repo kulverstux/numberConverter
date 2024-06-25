@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 public class Program
 {
-    public static bool IsItGood(string number)
+    public static bool IsItGoodHexNumber(string number)
     {
         if (number == null || number == "")
         {
@@ -53,9 +53,6 @@ public class Program
 
                 return false;
             }
-
-
-
         }
         return true;
 
@@ -66,14 +63,43 @@ public class Program
         string givenString = nr;
         bool isItInt = int.TryParse(givenString, out int intNumber);
         if (isItInt)
-            return true;
+        {
 
+
+            return true;
+        }
         else
         {
             Console.WriteLine("Wrong number entered.");
             return false;
         }
     }
+
+    public static bool CheckFormat(string number, string format)
+    {
+
+        bool isItIntNumber = int.TryParse(number, out int intNumber);
+        bool isItIntFormat = int.TryParse(format, out int intFormat);
+        int numberLength = number.Length;
+
+        for (int i = 0; i < numberLength; i++)
+        {
+            int liekana = intNumber % 10;
+            if (liekana >= intFormat)
+            {
+
+                Console.WriteLine("Number you entered is in bad format");
+                return false;
+            }
+            intNumber = intNumber / 10;
+
+        }
+
+        return true;
+    }
+
+
+
     public static void Converter(int system, bool custom)
     {
         bool isItcustom = custom;
@@ -87,15 +113,15 @@ public class Program
         Console.WriteLine("Please enter a number:");
         enteredNumber = Console.ReadLine();
         //intNumber = int.Parse(enteredNumber);
-        checkNumber(enteredNumber);
+        // checkNumber(enteredNumber);
         bool isItInt = int.TryParse(enteredNumber, out intNumber);
 
-        if (custom)
-        {
-            Console.WriteLine("Please enter a number system in number:");
-            string numberSystem = Console.ReadLine();
-            intNumberSystem = int.Parse(numberSystem);
-        }
+        //if (custom)
+        //{
+        //    Console.WriteLine("Please enter a number system in number:");
+        //    string numberSystem = Console.ReadLine();
+        //    intNumberSystem = int.Parse(numberSystem);
+        //}
 
         if (isItInt)
         {
@@ -163,48 +189,35 @@ public class Program
         while (itsOn)
         {
 
-            Console.WriteLine("Please choose to what you want to convert to:");
-            Console.WriteLine("1. to decimal(10)");
-            Console.WriteLine("2. to binary(2)");
-            Console.WriteLine("3. to octal(8)");
-            Console.WriteLine("4. to hexadecimal (16)");
-            Console.WriteLine("5. to custom");
-            Console.WriteLine("6. binary to decimal");
+            Console.WriteLine("Please enter number system you want:");
+            Console.WriteLine("10. decimal(10)");
+            Console.WriteLine("2. binary(2)");
+            Console.WriteLine("8. octal(8)");
+            Console.WriteLine("16. hexadecimal (16)");
+            Console.WriteLine("0. custom");
+            //  Console.WriteLine("6. binary to decimal");
 
-            string menuChoice = Console.ReadLine();
+            string selectedSystem = Console.ReadLine();
 
+            Console.WriteLine($"Please enter your number in selected format '{selectedSystem}':");
+            string givenNumber = Console.ReadLine();
 
-            switch (menuChoice)
+            if (CheckFormat(givenNumber, selectedSystem) && selectedSystem != "16")
             {
-                case "1":
-                    Converter(10, false);
-                    break;
-                case "2":
-                    Converter(2, false);
-                    break;
-                case "3":
-                    Converter(8, false);
-                    break;
-                case "4":
-                    
-                    Converter(16, false);
-                    break;
-                case "5":
-                    Converter(0, true);
-                    break;
-                case "6":
-                    BinaryToDecimal();
-                    break;
-                default:
-                    Console.WriteLine("Wrong menu item selected.");
-                    canProceed = false;
-                    break;
+                Console.WriteLine("Veikia, skaicius teisingas");
 
 
             }
+            else if (selectedSystem == "16" && IsItGoodHexNumber(selectedSystem))
+            {
+                Console.WriteLine("sesioliktainis");
 
-            // 
+            }
 
+
+
+
+            canProceed = true;
 
 
 
@@ -222,8 +235,11 @@ public class Program
                         Console.WriteLine("The End");
                         break;
                     default:
-                        Console.WriteLine("Wrong entry. Please enter 'y' to continue or 'n' to end the program.");
-                        break;
+                        {
+                            Console.WriteLine("Wrong entry. Please enter 'y' to continue or 'n' to end the program.");
+                            itsOn = false;
+                            break;
+                        }
                 }
             }
         }
