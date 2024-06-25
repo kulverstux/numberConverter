@@ -100,21 +100,21 @@ public class Program
 
 
 
-    public static void Converter(int system, bool custom)
+    public static void Converter(string number, string system)
     {
-        bool isItcustom = custom;
-        int intNumber = 0;
+
+        bool intNumberBool = int.TryParse(number, out int intNumber);
+        bool intSystemBool = int.TryParse(system, out int intNumberSystem);
         int leftOverNumber = 0;
         int i = 0;
-        int intNumberSystem = system;
-        string enteredNumber = "";
+      
         Dictionary<int, int> intDict = new Dictionary<int, int>();
 
-        Console.WriteLine("Please enter a number:");
-        enteredNumber = Console.ReadLine();
-        //intNumber = int.Parse(enteredNumber);
+        //Console.WriteLine("Please enter a number:");
+        //enteredNumber = Console.ReadLine();
+        //intNumber = int.Parse(enteredNumber); !!
         // checkNumber(enteredNumber);
-        bool isItInt = int.TryParse(enteredNumber, out intNumber);
+        //bool isItInt = int.TryParse(enteredNumber, out intNumber);
 
         //if (custom)
         //{
@@ -123,9 +123,11 @@ public class Program
         //    intNumberSystem = int.Parse(numberSystem);
         //}
 
-        if (isItInt)
-        {
-            while (intNumber >= leftOverNumber)
+        Console.WriteLine($"To witch format you want to convert your number? Your number is {intNumber} which is in {intNumberSystem} number system");
+        var ConvertToSystem = Console.ReadLine();
+
+
+        while (intNumber >= leftOverNumber) //converts to decimal
             {
                 leftOverNumber = intNumber % intNumberSystem;
                 intNumber = intNumber / intNumberSystem;
@@ -135,12 +137,13 @@ public class Program
                 if (intNumber != 0 && intNumber < leftOverNumber) intDict.Add(i, intNumber);
             }
 
-
+        
+           
+        
             int realLength = intDict.Count;
             int minusOneLength = realLength - 1;
 
-
-            for (; minusOneLength >= 0;)
+            for (; minusOneLength >= 0;) //output
             {
                 if (intNumberSystem == 2 && realLength % 4 == 0) Console.Write(" "); //dvejetainiu formatavimas
                 var singleDictValue = intDict[minusOneLength];
@@ -148,7 +151,7 @@ public class Program
                 minusOneLength--;
                 realLength--;
             }
-        }
+        
         Console.WriteLine();
     }
     public static void BinaryToDecimal()
@@ -204,8 +207,8 @@ public class Program
 
             if (CheckFormat(givenNumber, selectedSystem) && selectedSystem != "16")
             {
-                Console.WriteLine("Veikia, skaicius teisingas");
-
+                
+                Converter(givenNumber, selectedSystem);
 
             }
             else if (selectedSystem == "16" && IsItGoodHexNumber(selectedSystem))
@@ -237,7 +240,7 @@ public class Program
                     default:
                         {
                             Console.WriteLine("Wrong entry. Please enter 'y' to continue or 'n' to end the program.");
-                            itsOn = false;
+                           // itsOn = false;
                             break;
                         }
                 }
