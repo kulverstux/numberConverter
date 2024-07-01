@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 public class Program
 {
-    public static bool IsItGoodHexNumber(string number)
+    public static bool IsItGoodHexNumber(string number) //checks if entered hex number is in good format
     {
         if (number == null || number == "")
         {
@@ -38,34 +35,30 @@ public class Program
                 case 'D':
                 case 'E':
                 case 'F':
-
                     correctFormat = true;
                     break;
 
                 default:
-
                     correctFormat = false;
                     break;
-
             }
+
             if (!correctFormat)
             {
                 Console.WriteLine($"Wrong symbol in your number: {number[i]}");
-                Console.WriteLine("hexadecimal based numbers consists of digits from 0 to 9 and/or letters from A-F (A, B, C, D, E, F), case insensitive");
+                Console.WriteLine("Hexadecimal based numbers consists of digits from 0 to 9 and/or letters from A-F (A, B, C, D, E, F), case insensitive");
 
                 return false;
             }
         }
         return true;
-
-
     }
-    
-    public static bool CheckFormat(string number, string format)
+
+    public static bool CheckFormat(string number, string format) //checks if entered number is in good format (excluding hexadecimal)
     {
 
-        bool isItIntNumber = int.TryParse(number, out int intNumber);
-        bool isItIntFormat = int.TryParse(format, out int intFormat);
+        int.TryParse(number, out int intNumber);
+        int.TryParse(format, out int intFormat);
         int numberLength = number.Length;
 
         for (int i = 0; i < numberLength; i++)
@@ -74,7 +67,7 @@ public class Program
             if (liekana >= intFormat)
             {
 
-                Console.WriteLine("Number you entered is in bad format");
+                Console.WriteLine("Number you entered is in bad format. Please use digits only.");
                 return false;
             }
             intNumber = intNumber / 10;
@@ -84,27 +77,102 @@ public class Program
         return true;
     }
 
-    public static int ConvertToDecimal(int intNumber, int intNumberSystem) //converts given number to decimal for an easier conversion to desired base later on
+    public static int ConvertToDecimal(int intNumber, int intNumberSystem, Dictionary<int, int> transferedDict) //converts given number to decimal for an easier conversion to provided base later on
     {
-
         int newNumber = intNumber;
         int leftOverNumber = 0;
         double convertedToDecimal = 0;
         int power = 0;
-        while (newNumber > 0)
+        int index = 0;
+
+        if (transferedDict.Count != 0)            //checks if dictionary has any values. Only hexadecimal have values, others are empty
         {
-            leftOverNumber = newNumber % 10;
-            newNumber = newNumber / 10;
-            convertedToDecimal = convertedToDecimal + leftOverNumber * Math.Pow(intNumberSystem, power);
-            power++;
+            int strLength = transferedDict.Count - 1;
+            while (strLength >= 0)                //converts hexadecimal to decimal
+            {
+                int intValue = transferedDict[index];
+                convertedToDecimal = convertedToDecimal + intValue * Math.Pow(16, strLength);
+                strLength--;
+                index++;
+            }
+        }
+        else                                     //converts other than hexadecimal to decimal
+        {
+
+            while (newNumber > 0)
+            {
+                leftOverNumber = newNumber % 10;
+                newNumber = newNumber / 10;
+                convertedToDecimal = convertedToDecimal + leftOverNumber * Math.Pow(intNumberSystem, power);
+                power++;
+            }
+        }
+
+        return (int)convertedToDecimal;                                //any other way around without (int)??
+    }
+
+    public static void ConvertBackToHex(int element, Dictionary<int, int> ddd)    //takes each value from converted value to hex and replaces letters with numbers
+    {
+
+        switch (ddd[element])
+        {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+                {
+                    Console.Write(ddd[element]);
+                    break;
+                }
+            case 10:
+                {
+                    Console.Write('A');
+                    break;
+                }
+            case 11:
+                {
+                    Console.Write('B');
+                    break;
+                }
+            case 12:
+                {
+                    Console.Write('C');
+                    break;
+                }
+            case 13:
+                {
+                    Console.Write('D');
+                    break;
+                }
+            case 14:
+                {
+                    Console.Write('E');
+                    break;
+                }
+            case 15:
+                {
+                    Console.Write('F');
+                    break;
+                }
+
+            default:
+                Console.WriteLine("something is wrong with output reading");
+                break;
 
         }
 
-        return (int)convertedToDecimal;
     }
-    public static void PrintFinalOutput(int originalNumber, int originalBase, Dictionary<int, int> intDict, int ConvertToSystem) //prints final result
+
+    public static void PrintFinalOutput(string originalNumber, int originalBase, Dictionary<int, int> intDict, int ConvertToSystem) //prints final result
     {
         int realLength = intDict.Count;
+
         int minusOneLength = realLength - 1;
         Console.WriteLine($"Number entered: {originalNumber}, base: {originalBase}");
         Console.Write("Your new number: ");
@@ -112,7 +180,18 @@ public class Program
         {
             if (realLength % 4 == 0) Console.Write(" "); //formatting
             var singleDictValue = intDict[minusOneLength];
-            Console.Write(singleDictValue);
+
+
+            if (ConvertToSystem == 16)                                 //for converting to hexadecimal
+            {
+                ConvertBackToHex(minusOneLength, intDict);
+
+            }
+            else                                                     //conversion for other than hexadecimal
+            {
+                Console.Write(singleDictValue);
+            }
+
             minusOneLength--;
             realLength--;
         }
@@ -121,28 +200,26 @@ public class Program
 
     }
 
-    public static void Converter(string number, string system)
+    public static void Converter(string number, string system, Dictionary<int, int> d) //method controlling whole converting thing
     {
 
-          int.TryParse(number, out int intNumber);
-        bool intSystemBool = int.TryParse(system, out int intNumberSystem);
+        int.TryParse(number, out int intNumber);
+        int.TryParse(system, out int intNumberSystem);
         int leftOverNumber = 0;
         int convertedToDecimal = 0;
-
         int i = 0;
 
         Dictionary<int, int> intDict = new Dictionary<int, int>();
 
-        //intNumber = int.Parse(enteredNumber); !!
 
-        convertedToDecimal = ConvertToDecimal(intNumber, intNumberSystem);
-     
+        convertedToDecimal = ConvertToDecimal(intNumber, intNumberSystem, d);    //converts given number to decimal for an easier later on conversion
+
         Console.WriteLine("To witch format you want to convert your number?");
-        Console.WriteLine($"Your number is {intNumber}, number system: {intNumberSystem}");
+        Console.WriteLine($"Your number is {number}, number system: {intNumberSystem}");
         var conv = Console.ReadLine();
         int systemToConvertTo = int.Parse(conv);
 
-        while (convertedToDecimal >= leftOverNumber)
+        while (convertedToDecimal >= leftOverNumber)                //converts number to chosen system
         {
             leftOverNumber = convertedToDecimal % systemToConvertTo;
             convertedToDecimal = convertedToDecimal / systemToConvertTo;
@@ -150,33 +227,40 @@ public class Program
             i++;
         }
         intDict.Add(i, convertedToDecimal);
-        PrintFinalOutput(intNumber, intNumberSystem, intDict, systemToConvertTo);
+        PrintFinalOutput(number, intNumberSystem, intDict, systemToConvertTo);
     }
-    public static bool CheckNumberSystemInput(string selectedSystem)
-    {
-        int systemCheck = int.Parse(selectedSystem);
-        if (systemCheck == 10 ^ systemCheck == 2 ^ systemCheck == 8 ^ systemCheck == 16)
-        {
-            
-            return true;
 
-        }
+    public static bool CheckNumberSystemInput(string selectedSystem) //checks if correct system was chosen
+    {
+        //  int.TryParse(selectedSystem, out int systemCheck);
+
+        if (int.TryParse(selectedSystem, out int systemCheck))
+        {
+            if (systemCheck == 10 ^ systemCheck == 2 ^ systemCheck == 8 ^ systemCheck == 16)
+            {
+
+                return true;
+
+            }
             else if (systemCheck >= 17 && systemCheck <= 99)
             {
-                
+
                 return true;
             }
-                else
-                {
-                     Console.WriteLine("blogai");
-                    return false;
-                }
+            else
+            {
+                Console.WriteLine($"Selected system {selectedSystem} doesn't meet requirements. Systems you can choose are any from 17 to 99, 2, 8, 10 or 16. ");
+                return false;
+            }
+        }
+        Console.WriteLine($"Selected system {selectedSystem} doesn't meet requirements. Systems you can choose are any from 17 to 99, 2, 8, 10 or 16. ");
+        return false;
     }
 
-    public static void ConvertHexToDecimalNumber(string givenString) //converts given Hex numbers and letter to decimal value and sends to ConvertToDecimal for an actual conversion
+    public static Dictionary<int, int> ConvertHexToDecimalNumber(string givenString) //converts given Hex numbers and letters to each of their decimal value and sends to ConvertToDecimal for an actual conversion
     {
         string allCaps = givenString.ToUpper();
- 
+
         int strLength = givenString.Length - 1;
         int convertedNumberToDecimal = 0;
 
@@ -284,35 +368,18 @@ public class Program
                         break;
                     }
 
-
-
                 default:
 
-                    Console.WriteLine("Something went wrong with Hex converter to dec");
+                    Console.WriteLine("Something went wrong trying to convert Hex letters to numbers");
                     break;
 
             }
         }
-
-        string convertedToDecimal = "";
-
-        foreach (KeyValuePair <int, int> dict in hexToDecDict) 
-        {
-            convertedToDecimal = convertedToDecimal + dict.Value;
-            
-        }
-        Console.WriteLine(convertedToDecimal);
-        //while (strLength >= 0)
-        //{
-        //    int intValue = hexToDecDict[index];
-        //    convertedToDecimal = convertedToDecimal + intValue * Math.Pow(16, strLength);
-        //    strLength--;
-        //    index++;
-        //}
-
-        //string numberToString = convertedToDecimal.ToString(); //converts double type to string
+        return hexToDecDict;
 
     }
+
+    //-----------------------------//
     public static void Main()
     {
 
@@ -331,35 +398,35 @@ public class Program
             Console.WriteLine("0. custom from 17-99");
 
             string selectedSystem = Console.ReadLine();
-            bool isGivenBaseValid = CheckNumberSystemInput(selectedSystem);
-
-            Console.WriteLine($"Please enter your number in selected format '{selectedSystem}':");
-            string givenNumber = Console.ReadLine();
-
-            if (CheckFormat(givenNumber, selectedSystem) && selectedSystem != "16")
+            // bool isGivenBaseValid = CheckNumberSystemInput(selectedSystem);
+            if (CheckNumberSystemInput(selectedSystem))
             {
 
-                Converter(givenNumber, selectedSystem);
+                Console.WriteLine($"Please enter your number in selected format '{selectedSystem}':");
+                string givenNumber = Console.ReadLine();
 
+                if (CheckFormat(givenNumber, selectedSystem) && selectedSystem != "16")
+                {
+                    Dictionary<int, int> notUsed = new Dictionary<int, int>();
+                    Converter(givenNumber, selectedSystem, notUsed);                            //ar galima paduoti i metoda maziau argumentu??
+
+                }
+                else if (selectedSystem == "16" && IsItGoodHexNumber(givenNumber))
+                {
+
+                    Converter(givenNumber, selectedSystem, ConvertHexToDecimalNumber(givenNumber));
+
+                }
             }
-            else if (selectedSystem == "16" && IsItGoodHexNumber(givenNumber))
-            {
-                ////Converter(, selectedSystem);
-                ConvertHexToDecimalNumber(givenNumber);
-
-                //ConvertHexToDecimalNumber(givenNumber);
-
-
-            }
-
 
             canProceed = true;
 
 
 
-            //-----------		
+            //-----------        
             if (canProceed)
             {
+                Console.WriteLine("-----------------------------------");
                 Console.WriteLine("Do you want to continue? y/n");
                 doWeContinue = Console.ReadLine();
                 switch (doWeContinue)
@@ -373,7 +440,7 @@ public class Program
                     default:
                         {
                             Console.WriteLine("Wrong entry. Please enter 'y' to continue or 'n' to end the program.");
-                            // itsOn = false;
+                            itsOn = false;
                             break;
                         }
                 }
