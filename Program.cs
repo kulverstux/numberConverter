@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Runtime.InteropServices;
+using System.Text;
 public class Program
 {
     public static bool IsItGoodHexNumber(string number) //checks if entered hex number is in good format
@@ -54,51 +57,92 @@ public class Program
         return true;
     }
 
-    public static bool CheckFormat(string number, string format) //checks if entered number is in good format (excluding hexadecimal)
+    public static Dictionary <int, long> CheckFormat(string number, string format) //checks if entered number is in good format (excluding hexadecimal)
     {
 
-        int.TryParse(number, out int intNumber);
-        int.TryParse(format, out int intFormat);
-        int numberLength = number.Length;
-
-        for (int i = 0; i < numberLength; i++)
+        int intFormat = int.Parse(format); //converts format to int, format is already checked
+        var numbers = number.Split(' ');
+        
+        bool isItGood = true;
+        
+        Dictionary<int, long> givenNumberToDict = new Dictionary<int, long>();      
+        int dictKey = 0;
+        int howManyValuesNumberHave = numbers.Length;
+       
+        foreach (var n in numbers) 
         {
-            int liekana = intNumber % 10;
-            if (liekana >= intFormat)
-            {
+            if (long.TryParse(n, out long num))
+            { 
+                int numberLength = n.Length;
+                long numberToCheck = num;
+                for (int i = 0; i < numberLength; i++)
+                {
+                    if (howManyValuesNumberHave == 1)
+                    {
+                        long leftover = numberToCheck % 10;
+                        if (leftover >= intFormat)
+                        {
 
-                Console.WriteLine("Number you entered is in bad format. Please use digits only.");
-                return false;
+                            isItGood = false;
+                            break;
+                        }
+                        numberToCheck = numberToCheck / 10;
+                    }
+                    else if (num >= intFormat)
+                        {
+    
+                            isItGood = false;
+                            break;
+                        }
+  
+                }
+                if (isItGood)
+                {
+                    givenNumberToDict.Add(dictKey, num);
+                    dictKey++;
+                }
+                else 
+                {
+                    Console.WriteLine($"Number you entered is in bad format. Digits/numbers cannot be higher than your selected -{intFormat}- format.");
+                    givenNumberToDict.Clear();
+                    break;
+                }
             }
-            intNumber = intNumber / 10;
+            else 
+            {
+                Console.WriteLine("Please use digits only seperated by space.");
+                givenNumberToDict.Clear();
+                break;
+            }
 
         }
 
-        return true;
+        return givenNumberToDict;
+
     }
 
-    public static int ConvertToDecimal(int intNumber, int intNumberSystem, Dictionary<int, int> transferedDict) //converts given number to decimal for an easier conversion to provided base later on
+    public static double ConvertToDecimal(int intNumber, int intNumberSystem, Dictionary<int, long> transferedDict) //converts given number to decimal for an easier conversion to provided base later on
     {
-        int newNumber = intNumber;
-        int leftOverNumber = 0;
+        long leftOverNumber = 0;
         double convertedToDecimal = 0;
         int power = 0;
         int index = 0;
+        int countHowManyValuesDictHave = transferedDict.Count;
 
-        if (transferedDict.Count != 0)            //checks if dictionary has any values. Only hexadecimal have values, others are empty
+        //if (transferedDict.Count != 0)            //checks if dictionary has any values. Only hexadecimal have values, others are empty
+        //{
+        //    int strLength = transferedDict.Count - 1;
+        //    while (strLength >= 0)                //converts hexadecimal to decimal
+        //    {
+        //        int intValue = transferedDict[index];
+        //        convertedToDecimal = convertedToDecimal + intValue * Math.Pow(16, strLength);
+        //        strLength--;
+        //        index++;
+        //    }
+        //}
+        if (countHowManyValuesDictHave == 1)
         {
-            int strLength = transferedDict.Count - 1;
-            while (strLength >= 0)                //converts hexadecimal to decimal
-            {
-                int intValue = transferedDict[index];
-                convertedToDecimal = convertedToDecimal + intValue * Math.Pow(16, strLength);
-                strLength--;
-                index++;
-            }
-        }
-        else                                     //converts other than hexadecimal to decimal
-        {
-
+            long newNumber = transferedDict[0];
             while (newNumber > 0)
             {
                 leftOverNumber = newNumber % 10;
@@ -107,11 +151,22 @@ public class Program
                 power++;
             }
         }
-
-        return (int)convertedToDecimal;                                //any other way around without (int)??
+    
+        else
+        {
+            countHowManyValuesDictHave--;
+            while (countHowManyValuesDictHave >= 0)
+            {
+                convertedToDecimal = convertedToDecimal + transferedDict[index] * Math.Pow(intNumberSystem, countHowManyValuesDictHave);
+                countHowManyValuesDictHave--;
+                index++;
+            }
+        }
+        Console.WriteLine($"converted to deci: {convertedToDecimal}");
+        return convertedToDecimal;    
     }
 
-    public static void ConvertBackToHex(int element, Dictionary<int, int> ddd)    //takes each value from converted value to hex and replaces letters with numbers
+    public static void ConvertBackToHex(int element, Dictionary<int, long> ddd)    //takes each value from converted value to hex and replaces letters with numbers
     {
 
         switch (ddd[element])
@@ -169,27 +224,29 @@ public class Program
 
     }
 
-    public static void PrintFinalOutput(string originalNumber, int originalBase, Dictionary<int, int> intDict, int ConvertToSystem) //prints final result
+    public static void PrintFinalOutput(string originalNumber, int originalBase, Dictionary<int, long> intDict, int ConvertToSystem) //prints final result
     {
         int realLength = intDict.Count;
 
         int minusOneLength = realLength - 1;
         Console.WriteLine($"Number entered: {originalNumber}, base: {originalBase}");
-        Console.Write("Your new number: ");
+        Console.Write($"Your number converted to {ConvertToSystem} system: ");
         for (; minusOneLength >= 0;) //output
         {
-            if (realLength % 4 == 0) Console.Write(" "); //formatting
             var singleDictValue = intDict[minusOneLength];
-
-
-            if (ConvertToSystem == 16)                                 //for converting to hexadecimal
+            if (ConvertToSystem >= 10 && ConvertToSystem != 16)                                                     //conversion for other than hexadecimal
+            {
+                Console.Write($"{singleDictValue} ");
+            }
+            else if (ConvertToSystem == 16)                                 //for converting to hexadecimal
             {
                 ConvertBackToHex(minusOneLength, intDict);
-
             }
-            else                                                     //conversion for other than hexadecimal
+
+            else
             {
-                Console.Write(singleDictValue);
+                if (realLength % 4 == 0) Console.Write(" ");
+                Console.Write($"{singleDictValue}");
             }
 
             minusOneLength--;
@@ -200,71 +257,89 @@ public class Program
 
     }
 
-    public static void Converter(string number, string system, Dictionary<int, int> d) //method controlling whole converting thing
+    public static void Converter(string number, string system, Dictionary<int, long> d) //method controlling whole converting thing
     {
 
         int.TryParse(number, out int intNumber);
         int.TryParse(system, out int intNumberSystem);
-        int leftOverNumber = 0;
-        int convertedToDecimal = 0;
+        double leftOverNumber = 0;
+        double convertedToDecimal = 0;
         int i = 0;
 
-        Dictionary<int, int> intDict = new Dictionary<int, int>();
+        Dictionary<int, long> intDict = new Dictionary<int, long>();
 
 
         convertedToDecimal = ConvertToDecimal(intNumber, intNumberSystem, d);    //converts given number to decimal for an easier later on conversion
 
         Console.WriteLine("To witch format you want to convert your number?");
         Console.WriteLine($"Your number is {number}, number system: {intNumberSystem}");
+       
         var conv = Console.ReadLine();
-        int systemToConvertTo = int.Parse(conv);
 
-        while (convertedToDecimal >= leftOverNumber)                //converts number to chosen system
+        if (int.TryParse(conv, out int systemToConvertTo))
         {
-            leftOverNumber = convertedToDecimal % systemToConvertTo;
-            convertedToDecimal = convertedToDecimal / systemToConvertTo;
-            intDict.Add(i, leftOverNumber);
-            i++;
+            while (convertedToDecimal >= leftOverNumber)                //converts number to chosen system
+            {
+                leftOverNumber = convertedToDecimal % systemToConvertTo;
+                convertedToDecimal = convertedToDecimal / systemToConvertTo;
+                intDict.Add(i, (long)leftOverNumber);
+                i++;
+            }
+            intDict.Add(i, (long)convertedToDecimal);
+            PrintFinalOutput(number, intNumberSystem, intDict, systemToConvertTo);
         }
-        intDict.Add(i, convertedToDecimal);
-        PrintFinalOutput(number, intNumberSystem, intDict, systemToConvertTo);
+        else 
+        {
+            Console.WriteLine($"{conv} is not a correct system to convert to. Please write a number.");
+        }
     }
 
-    public static bool CheckNumberSystemInput(string selectedSystem) //checks if correct system was chosen
+    public static bool CheckNumberSystemInput(string selectedSystem, out string numberFormatManuallyEntered) //checks if correct system was chosen
     {
-        //  int.TryParse(selectedSystem, out int systemCheck);
 
-        if (int.TryParse(selectedSystem, out int systemCheck))
-        {
-            if (systemCheck == 10 ^ systemCheck == 2 ^ systemCheck == 8 ^ systemCheck == 16)
+            numberFormatManuallyEntered = "";
+            if (int.TryParse(selectedSystem, out int systemCheck))
             {
+                if (systemCheck == 10 ^ systemCheck == 2 ^ systemCheck == 8 ^ systemCheck == 16)
+                {
 
-                return true;
+                    return true;
 
-            }
-            else if (systemCheck >= 17 && systemCheck <= 99)
-            {
+                }
+                else if (systemCheck == 0)
 
-                return true;
+                {
+                    Console.WriteLine("Please enter a number system of your choice from 17 to 99: ");
+                    string? entered = Console.ReadLine();
+                    if (int.TryParse(entered, out int isItGood) && isItGood >= 17 && isItGood <= 99)
+                    {
+                        numberFormatManuallyEntered = entered;
+                        return true;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Selected system {entered} doesn't meet requirements. Systems you can choose are any from 17 to 99.");
+                        return false;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Selected system {selectedSystem} doesn't meet requirements. Systems you can choose are any from 17 to 99, 2, 8, 10 or 16. ");
+                    return false;
+                }
             }
-            else
-            {
-                Console.WriteLine($"Selected system {selectedSystem} doesn't meet requirements. Systems you can choose are any from 17 to 99, 2, 8, 10 or 16. ");
-                return false;
-            }
-        }
-        Console.WriteLine($"Selected system {selectedSystem} doesn't meet requirements. Systems you can choose are any from 17 to 99, 2, 8, 10 or 16. ");
+            Console.WriteLine($"Selected system {selectedSystem} doesn't meet requirements. Your entered symbol does not meet criteria ");
         return false;
     }
 
-    public static Dictionary<int, int> ConvertHexToDecimalNumber(string givenString) //converts given Hex numbers and letters to each of their decimal value and sends to ConvertToDecimal for an actual conversion
+    public static Dictionary<int, long> ConvertHexToDecimalNumber(string givenString) //converts given Hex numbers and letters to each of their decimal value and sends to ConvertToDecimal for an actual conversion
     {
         string allCaps = givenString.ToUpper();
 
         int strLength = givenString.Length - 1;
         int convertedNumberToDecimal = 0;
 
-        Dictionary<int, int> hexToDecDict = new Dictionary<int, int>();
+        Dictionary<int, long> hexToDecDict = new Dictionary<int, long>();
 
         for (int i = 0; i <= strLength; i++)
         {
@@ -397,18 +472,21 @@ public class Program
             Console.WriteLine("16. hexadecimal (16)");
             Console.WriteLine("0. custom from 17-99");
 
-            string selectedSystem = Console.ReadLine();
-            // bool isGivenBaseValid = CheckNumberSystemInput(selectedSystem);
-            if (CheckNumberSystemInput(selectedSystem))
+            string ?selectedSystem = Console.ReadLine();
+
+            if (CheckNumberSystemInput(selectedSystem, out string numberFormatManuallyEntered))
             {
+                if (numberFormatManuallyEntered != "") selectedSystem = numberFormatManuallyEntered; //if format was chosen as custom, returns manually entered format
 
                 Console.WriteLine($"Please enter your number in selected format '{selectedSystem}':");
-                string givenNumber = Console.ReadLine();
+                string ?givenNumber = Console.ReadLine();
 
-                if (CheckFormat(givenNumber, selectedSystem) && selectedSystem != "16")
+
+                if (selectedSystem != "16" && CheckFormat(givenNumber, selectedSystem).Count != 0)
                 {
-                    Dictionary<int, int> notUsed = new Dictionary<int, int>();
-                    Converter(givenNumber, selectedSystem, notUsed);                            //ar galima paduoti i metoda maziau argumentu??
+
+                    Dictionary<int, long> DictionaryWithSeperatedNumbersEntered = CheckFormat(givenNumber, selectedSystem);
+                    Converter(givenNumber, selectedSystem, DictionaryWithSeperatedNumbersEntered);
 
                 }
                 else if (selectedSystem == "16" && IsItGoodHexNumber(givenNumber))
@@ -426,27 +504,37 @@ public class Program
             //-----------        
             if (canProceed)
             {
-                Console.WriteLine("-----------------------------------");
-                Console.WriteLine("Do you want to continue? y/n");
-                doWeContinue = Console.ReadLine();
-                switch (doWeContinue)
+                
+                do
                 {
-                    case "y":
-                        break;
-                    case "n":
-                        itsOn = false;
-                        Console.WriteLine("The End");
-                        break;
-                    default:
-                        {
-                            Console.WriteLine("Wrong entry. Please enter 'y' to continue or 'n' to end the program.");
-                            itsOn = false;
+                    Console.WriteLine("-----------------------------------");
+                    Console.WriteLine("Do you want to continue? y/n");
+                    doWeContinue = Console.ReadLine();
+                    switch (doWeContinue)
+                    {
+                        case "y":
+                            
+                            itsOn = true;
                             break;
-                        }
-                }
+                        case "n":
+                            itsOn = false;
+                            Console.WriteLine("The End");
+                            break;
+                        default:
+                            {
+                                Console.WriteLine("Wrong entry. Please enter 'y' to continue or 'n' to end the program.");
+                                canProceed = false;
+                                itsOn = false;
+                                break;
+                            }
+                    }
+                } 
+                while (!canProceed);
             }
         }
 
     }
 
 }
+
+
